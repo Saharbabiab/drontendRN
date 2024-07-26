@@ -1,20 +1,21 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { UserProvider } from "./utils/userContext";
+import Navbar from "./components/navbar"; // Make sure Navbar is compatible with React Native
 
-export default function App() {
+export default function App({ Component, pageProps }) {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <UserProvider>
+      <View style={styles.container}>
+        <Navbar />
+        <Component {...pageProps} />
+      </View>
+    </UserProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
