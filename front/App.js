@@ -1,22 +1,23 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { UserProvider } from "./utils/userContext";
-import Navbar from "./components/Navbar"; // Make sure Navbar is compatible with React Native
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import HomePage from "./pages/HomeScreen";
+import LoginPage from "./pages/Login";
+import SignUpPage from "./pages/signuplogin";
 
-export default function App({ Component, pageProps }) {
+const Stack = createNativeStackNavigator();
+
+export default function App() {
   return (
     <UserProvider>
-      <View style={styles.container}>
-        <Navbar />
-        <Text>My App</Text>
-        <Component {...pageProps} />
-      </View>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomePage} />
+          <Stack.Screen name="Login" component={LoginPage} />
+          <Stack.Screen name="SignUp" component={SignUpPage} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </UserProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

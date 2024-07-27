@@ -12,7 +12,7 @@ import axios from "axios";
 import { useUserContext } from "../utils/userContext";
 import { useNavigation } from "@react-navigation/native";
 
-export default function SignUpPage({ navigation }) {
+export default function LoginPage({ navigation }) {
   const { user, setUser, setCart } = useUserContext();
 
   useEffect(() => {
@@ -24,7 +24,6 @@ export default function SignUpPage({ navigation }) {
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     username: "",
-    name: "",
     password: "",
   });
 
@@ -36,32 +35,18 @@ export default function SignUpPage({ navigation }) {
   };
 
   const handleSubmit = async () => {
-    if (!formData.username || !formData.name || !formData.password) {
-      setError("Please fill out all fields");
-      return;
-    }
-    if (formData.password.length < 5) {
-      setError("Password must be at least 5 characters");
-      return;
-    } else if (formData.password.length > 20) {
-      setError("Password must be less than 20 characters");
-      return;
-    }
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/users/signup",
-        {
-          username: formData.username,
-          name: formData.name,
-          password: formData.password,
-        }
+        "http://localhost:3001/api/users/login",
+        formData
       );
-      if (response.data == "username already exists") {
-        setError("username already exists");
+      if (response.data == "username is incorrect") {
+        setError("username is incorrect");
+      } else if (response.data == "password is incorrect") {
+        setError("password is incorrect");
       } else {
         setUser(response.data);
         setCart(response.data.cart);
-        navigation.navigate("Home");
       }
     } catch (err) {
       console.log(err);
@@ -70,7 +55,7 @@ export default function SignUpPage({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Sign Up</Text>
+      <Text style={styles.heading}>Login</Text>
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -78,19 +63,14 @@ export default function SignUpPage({ navigation }) {
       />
       <TextInput
         style={styles.input}
-        placeholder="name"
-        onChangeText={(text) => handleChange("name", text)}
-      />
-      <TextInput
-        style={styles.input}
         placeholder="Password"
-        secureTextEntry={true}
         onChangeText={(text) => handleChange("password", text)}
+        secureTextEntry
       />
-      <Button title="Sign Up" onPress={handleSubmit} />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text style={styles.subheading}>Already have an account? Login</Text>
+      <Button title="Login" onPress={handleSubmit} />
+      <Text style={styles.error}>{error}</Text>
+      <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+        <Text style={styles.link}>Don't have an account? Sign up here</Text>
       </TouchableOpacity>
     </View>
   );
@@ -104,19 +84,20 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
-    color: "blue",
-  },
-  subheading: {
-    fontSize: 20,
-    color: "green",
+    marginBottom: 20,
   },
   input: {
-    width: 200,
-    margin: 10,
+    width: "80%",
     padding: 10,
+    marginBottom: 20,
     borderWidth: 1,
+    borderColor: "black",
   },
   error: {
     color: "red",
+    marginBottom: 20,
+  },
+  link: {
+    color: "blue",
   },
 });

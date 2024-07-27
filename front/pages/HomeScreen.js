@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Button } from "react-native";
 import axios from "axios";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useUserContext } from "../utils/userContext";
 
-export default function HomePage() {
-  const [users, setUsers] = useState(null);
+const Stack = createNativeStackNavigator();
+
+export default function HomePage({ navigation }) {
+  const { user, setUser, setCart } = useUserContext();
 
   useEffect(() => {
     const getUsers = async () => {
@@ -22,18 +27,13 @@ export default function HomePage() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Welcome to our store</Text>
-      <Text style={styles.subheading}>all</Text>
-      <View style={styles.productsContainer}>
-        {users &&
-          users.map((user) => (
-            <View key={user._id} style={styles.productContainer}>
-              <Text>{user.name}</Text>
-              <Text>{user.username}</Text>
-              <Text>{user.password}</Text>
-            </View>
-          ))}
+    <View>
+      <View style={styles.container}>
+        {user ? (
+          <Text style={styles.subheading}>Welcome, {user.name}</Text>
+        ) : (
+          <Button title="Login" onPress={() => navigation.navigate("Login")} />
+        )}
       </View>
     </View>
   );
@@ -67,5 +67,10 @@ const styles = StyleSheet.create({
   },
   quantityText: {
     margin: 10,
+  },
+  logincontainer: {
+    flex: 1,
+    justifyContent: "left",
+    alignItems: "left",
   },
 });
