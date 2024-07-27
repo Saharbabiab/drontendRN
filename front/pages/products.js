@@ -15,8 +15,7 @@ import ProductCard from "../components/ProductCard";
 import AddProduct from "../components/AddProduct";
 import MyPagination from "../components/MyPagination";
 
-export default function ProductsPage() {
-  const navigation = useNavigation();
+export default function ProductsPage({ navigation }) {
   const { user } = useUserContext();
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);

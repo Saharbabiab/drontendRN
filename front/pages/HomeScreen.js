@@ -11,26 +11,21 @@ export default function HomePage({ navigation }) {
   const { user, setUser, setCart } = useUserContext();
 
   useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/api/users/all");
-        if (!response.data) {
-          console.log("Something went wrong while getting all users");
-          return;
-        }
-        setUsers(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    getUsers();
+    setUser({ name: "John Doe" });
   }, []);
 
   return (
     <View>
       <View style={styles.container}>
         {user ? (
-          <Text style={styles.subheading}>Welcome, {user.name}</Text>
+          <View>
+            <Text style={styles.subheading}>Welcome {user.name}</Text>
+            <Button title="Logout" onPress={() => setUser(null)} />
+            <Button
+              title="Products"
+              onPress={() => navigation.navigate("Products")}
+            />
+          </View>
         ) : (
           <Button title="Login" onPress={() => navigation.navigate("Login")} />
         )}
