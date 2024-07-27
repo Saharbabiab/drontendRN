@@ -7,7 +7,7 @@ import {
   FlatList,
 } from "react-native";
 import axios from "axios";
-import { useNavigation } from "@react-navigation/native";
+import useNavigation from "@react-navigation/native";
 import { Button } from "react-native-elements";
 import { Picker } from "@react-native-picker/picker";
 import { useUserContext } from "../utils/userContext";
