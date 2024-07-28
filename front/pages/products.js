@@ -21,28 +21,30 @@ export default function ProductsPage() {
   }, [showAddProduct]);
 
   return (
-    <View>
+    <ScrollView contentContainerStyle={styles.scrollStyle}>
       <AddProduct
         setShowAddProduct={setShowAddProduct}
         setProducts={setProducts}
       />
-      <ScrollView style={styles.scrollStyle}>
-        <Text style={styles.heading}>Products</Text>
-        <View style={styles.productsContainer}>
-          {products != null ? (
-            <FlatList
-              data={products}
-              keyExtractor={(item) => item._id}
-              renderItem={({ item }) => (
-                <ProductCard product={item} setProducts={setProducts} />
-              )}
+
+      <Text style={styles.heading}>Products</Text>
+      {products != null ? (
+        <FlatList
+          horizontal={true}
+          data={products}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <ProductCard
+              key={item._id}
+              product={item}
+              setProducts={setProducts}
             />
-          ) : (
-            <Text>No products found</Text>
           )}
-        </View>
-      </ScrollView>
-    </View>
+        />
+      ) : (
+        <Text>No products found</Text>
+      )}
+    </ScrollView>
   );
 }
 
@@ -61,28 +63,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  productsContainer: {
-    flexDirection: "column",
-    margin: 15,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-    flexWrap: "wrap",
-    flex: 3,
-  },
-  productContainer: {
-    alignItems: "center",
+  listStyle: {
     flexDirection: "row",
-    width: "20%",
-    flex: 1,
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
   quantityText: {
     margin: 10,
   },
   scrollStyle: {
-    height: "100%",
-    width: "100%",
-    flex: 5,
-    flexDirection: "row",
+    flexGrow: 1,
   },
 });

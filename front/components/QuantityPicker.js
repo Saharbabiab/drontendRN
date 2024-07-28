@@ -34,7 +34,7 @@ const QuantityPicker = ({ onChange, defaultValue = 1, disabled, max = 5 }) => {
       <Text style={{ marginHorizontal: 10 }}>{quantity}</Text>
       <Button
         title="+"
-        disabled={quantity === 5 || disabled || quantity === max}
+        disabled={disabled || quantity === max}
         onPress={handleIncrement}
       />
     </View>

@@ -46,7 +46,9 @@ export default function LoginPage({ navigation }) {
         setError("password is incorrect");
       } else {
         setUser(response.data);
-        setCart(response.data.cart);
+        const res = await axios.get("http://localhost:3001/api/users/getCart");
+        setCart(res.data);
+        console.log(res.data);
       }
     } catch (err) {
       console.log(err);

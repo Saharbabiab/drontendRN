@@ -7,7 +7,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   Modal,
 } from "react-native";
 import axios from "axios";
@@ -15,7 +14,7 @@ import { useUserContext } from "../utils/userContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import dayjs from "dayjs";
 
-export default function Profile({ navigation }) {
+export default function ProfilePage({ navigation }) {
   const { user, setUser } = useUserContext();
   const [orders, setOrders] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -39,13 +38,13 @@ export default function Profile({ navigation }) {
   const handleChange = (name, value) => {
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: value || "", // Ensure that value is always a string
     }));
   };
 
   const handleEditOpen = () => {
     setFormData({
-      name: user.name,
+      name: user.name || "", // Ensure name is a string
       password: "",
       newPassword: "",
       confirmNewPassword: "",
@@ -65,8 +64,11 @@ export default function Profile({ navigation }) {
         }
       );
 
-      if (!response)
-        return console.log("something went wrong while updating name");
+      if (!response) {
+        console.log("something went wrong while updating name");
+        return;
+      }
+
       setUser({ ...user, name: formData.name });
       setSeverity("success");
       setTitle("Success");
@@ -91,6 +93,7 @@ export default function Profile({ navigation }) {
       }, 2000);
       return;
     }
+
     try {
       const response = await axios.put(
         `http://localhost:3001/api/users/updatePassword/`,
@@ -110,7 +113,7 @@ export default function Profile({ navigation }) {
         setTimeout(() => {
           setOpenEditMessage(false);
         }, 2000);
-        return console.log("Something went wrong while updating password");
+        return;
       }
 
       if (response.data === "old password is not correct") {
@@ -139,10 +142,10 @@ export default function Profile({ navigation }) {
 
   useEffect(() => {
     let total = 0;
-    if (orders) {
-      orders.forEach((o) => {
-        total += o.totalPrice;
-      });
+    if (orders && orders.length) {
+      for (let i = 0; i < orders.length; i++) {
+        total += orders[i].totalPrice;
+      }
     }
     setTotalPrice(total);
   }, [orders]);
@@ -155,8 +158,12 @@ export default function Profile({ navigation }) {
             user._id
           }/${startD.getTime()}/${endD.getTime()}`
         );
-        if (!response)
-          return console.log("something went wrong while getting orders");
+
+        if (!response) {
+          console.log("something went wrong while getting orders");
+          return;
+        }
+
         setOrders(response.data);
       } catch (err) {
         console.log(err);
@@ -167,7 +174,7 @@ export default function Profile({ navigation }) {
       navigation.navigate("SignupLogin");
     } else {
       setFormData({
-        name: user.name,
+        name: user.name || "", // Ensure name is a string
         password: "",
         newPassword: "",
       });
@@ -181,8 +188,12 @@ export default function Profile({ navigation }) {
         const response = await axios.get(
           `http://localhost:3001/api/users/getTopBuyer`
         );
-        if (!response)
-          return console.log("something went wrong while getting top buyer");
+
+        if (!response) {
+          console.log("something went wrong while getting top buyer");
+          return;
+        }
+
         setTopBuyer(response.data);
       } catch (err) {
         console.log(err);
@@ -196,7 +207,7 @@ export default function Profile({ navigation }) {
     if (topBuyer[0] && topBuyer[0]._id === user._id) {
       setIsTopBuyer(true);
     }
-  }, [topBuyer]);
+  }, [topBuyer, user]);
 
   return (
     <View style={styles.container}>
@@ -236,21 +247,21 @@ export default function Profile({ navigation }) {
               style={styles.input}
               placeholder="Current Password"
               secureTextEntry
-              value={formData.password}
+              value={formData.password || ""} // Ensure password is a string
               onChangeText={(value) => handleChange("password", value)}
             />
             <TextInput
               style={styles.input}
               placeholder="New Password"
               secureTextEntry
-              value={formData.newPassword}
+              value={formData.newPassword || ""} // Ensure newPassword is a string
               onChangeText={(value) => handleChange("newPassword", value)}
             />
             <TextInput
               style={styles.input}
               placeholder="Confirm New Password"
               secureTextEntry
-              value={formData.confirmNewPassword}
+              value={formData.confirmNewPassword || ""} // Ensure confirmNewPassword is a string
               onChangeText={(value) =>
                 handleChange("confirmNewPassword", value)
               }
@@ -275,7 +286,7 @@ export default function Profile({ navigation }) {
           <View style={styles.alertContainer}>
             <Text style={styles.alertText}>
               Congratulations! You are our top buyer, with a total purchase of $
-              {topBuyer[0].totalPurchases}.
+              {topBuyer[0]?.totalPurchases || 0}.
             </Text>
           </View>
         )}
@@ -287,27 +298,25 @@ export default function Profile({ navigation }) {
             value={startD}
             mode="date"
             display="default"
-            onChange={(event, date) => setStartD(date)}
+            onChange={(event, date) => setStartD(date || startD)}
           />
           <DateTimePicker
             value={endD}
             mode="date"
             display="default"
-            onChange={(event, date) => setEndD(date)}
+            onChange={(event, date) => setEndD(date || endD)}
           />
         </View>
         <FlatList
           data={orders}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("OrderDetails", { orderId: item._id })
-              }
-            >
+            <TouchableOpacity>
               <View style={styles.orderItem}>
                 <Text>Order ID: {item._id}</Text>
-                <Text>Total Products: {item.items.length}</Text>
+                <Text>
+                  Total Products: {item.items ? item.items.length : 0}
+                </Text>
                 <Text>Total Price: ${item.totalPrice}</Text>
                 <Text>
                   Date: {dayjs(item.createdAt).format("DD/MM/YY, HH:mm")}
@@ -326,68 +335,68 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: "center",
   },
   subTitle: {
     fontSize: 20,
-    fontWeight: "bold",
     marginBottom: 10,
+  },
+  infoContainer: {
+    width: "100%",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "black",
     padding: 10,
-    borderRadius: 5,
     marginBottom: 10,
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     marginBottom: 20,
   },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
   },
   modalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  ordersContainer: {
-    marginTop: 20,
-  },
-  datePickers: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  orderItem: {
-    padding: 15,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    fontSize: 20,
     marginBottom: 10,
   },
   alertContainer: {
     padding: 10,
     marginVertical: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
   },
   alertText: {
-    textAlign: "center",
+    fontSize: 16,
   },
   success: {
     color: "green",
   },
   error: {
     color: "red",
+  },
+  ordersContainer: {
+    width: "100%",
+  },
+  orderItem: {
+    padding: 10,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: "black",
+    borderRadius: 5,
+  },
+  datePickers: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 10,
   },
 });

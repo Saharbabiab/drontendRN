@@ -10,6 +10,7 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
   const [Validated, setValidated] = useState(false);
   const [quantity, setQuantity] = useState(formData.inStock > 0 ? 1 : 0);
   const [show, setShow] = useState(false);
+  const [message, setMessage] = useState("");
   const [edited, setEdited] = useState({
     name: formData.name,
     img: formData.img,
@@ -35,11 +36,12 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
       );
       if (!response) return console.log("something went wrong while editing");
       console.log(response);
-      Alert.alert("Product edited");
-      setProducts((prevProducts) =>
-        prevProducts.map((p) => (p._id === edited._id ? response.data : p))
-      );
-      setFormData(response.data);
+      await axios
+        .get(`http://localhost:3001/api/products/getProducts`)
+        .then((res) => {
+          setProducts(res.data);
+          setFormData(response.data);
+        });
       setShow(false);
       console.log(formData);
     } catch (err) {
@@ -52,13 +54,26 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
         `http://localhost:3001/api/users/addToCart/${formData._id}`,
         { userId: user._id, qty: quantity }
       );
-      if (!response)
-        return console.log("something went wrong while adding to cart");
-      if (response.data == "Not enough in stock") {
-        return setMessage("Not enough in stock");
+      if (!response) {
+        console.log("Something went wrong while adding to cart");
+        return;
       } else {
-        setCart(response.data);
+        setMessage("Not enough in stock");
+        setShow(true);
       }
+      if (response.status === 200) {
+        await axios
+          .get(`http://localhost:3001/api/users/getCart/${user._id}`)
+          .then(
+            (res) => {
+              setCart(res.data.cart);
+            },
+            (err) => {
+              console.log(err);
+            }
+          );
+      }
+      setQuantity(1);
     } catch (err) {
       console.log(err);
     }
@@ -87,7 +102,8 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
       <Text style={styles.price}>${formData.price}</Text>
       <QuantityPicker
         onChange={handleQuantityChange}
-        defaultValue={quantity}
+        defaultValue={1}
+        disabled={formData.inStock <= 0}
         max={formData.inStock}
       />
       <Button title="Edit" onPress={() => setShow(true)} />
@@ -96,7 +112,12 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
 "
         onPress={handleDelete}
       />
-      <Button title="Add to cart" onPress={handleAddToCart} />
+      <Button
+        title="Add to cart"
+        onPress={handleAddToCart}
+        disabled={formData.inStock <= 0}
+      />
+      {show && <Text>{message}</Text>}
       <Animated.View style={{ opacity: show ? 1 : 0 }}>
         <View style={styles.form}>
           <Text style={styles.heading}>Edit Product</Text>

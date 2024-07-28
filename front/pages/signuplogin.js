@@ -60,7 +60,8 @@ export default function SignUpPage({ navigation }) {
         setError("username already exists");
       } else {
         setUser(response.data);
-        setCart(response.data.cart);
+        const res = await axios.get("http://localhost:3001/api/users/getCart");
+        setCart(res.data);
         navigation.navigate("Home");
       }
     } catch (err) {
