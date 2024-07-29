@@ -9,7 +9,7 @@ export default function CartPopoverProduct({ item }) {
   const handleDelete = async () => {
     try {
       const response = await axios.delete(
-        `http://localhost:3001/api/users/removeFromCart/${item._id}`,
+        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/removeFromCart/${item._id}`,
         { data: { userId: user._id } }
       );
       if (!response) console.log("something went wrong while deleting product");

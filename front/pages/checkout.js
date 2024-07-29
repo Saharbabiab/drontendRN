@@ -23,7 +23,7 @@ export default function CheckoutPage() {
   const handleDelete = async (productId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3001/api/users/removeFromCart/${productId}`,
+        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/removeFromCart/${productId}`,
         { data: { userId: user._id } }
       );
       if (!response) console.log("something went wrong while deleting product");
@@ -44,7 +44,7 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/orders/create",
+        "https://rz2zg90j-3001.euw.devtunnels.ms/api/orders/create",
         { userId: user._id, items: cart, totalPrice: totalPrice }
       );
       if (response.status === 200) {
@@ -53,7 +53,7 @@ export default function CheckoutPage() {
         setUpdateCartModal(true);
         for (let product of cart) {
           await axios.delete(
-            `http://localhost:3001/api/users/removeFromCart/${product._id}`,
+            `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/removeFromCart/${product._id}`,
             { data: { userId: user._id } }
           );
         }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Overlay } from "react-native-elements";
+import { Button, Modal } from "react-native";
 import { useUserContext } from "../utils/userContext";
 import CartPopoverProduct from "./CartPopoverProduct";
 import axios from "axios";
@@ -7,7 +7,7 @@ import { View, Text, ScrollView, StyleSheet } from "react-native";
 
 const ShoppingCart = () => {
   const { user, cart, setCart } = useUserContext();
-  const [visible, setVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [cartTotal, setCartTotal] = useState(0);
   const [cartProducts, setCartProducts] = useState([]);
 
@@ -15,7 +15,7 @@ const ShoppingCart = () => {
     const getCart = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/users/getCart/${user._id}`
+          `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart/${user._id}`
         );
         setCart(response.data);
         setCartProducts(response.data);
@@ -27,23 +27,24 @@ const ShoppingCart = () => {
         console.error("Error fetching cart:", error);
       }
     };
+
     if (user) {
       getCart();
     }
-  }, [user, cart, setCart]);
+  }, [user]);
 
-  const toggleOverlay = () => {
-    setVisible(!visible);
+  const toggleModal = () => {
+    setModalVisible((prev) => !prev);
   };
 
   return (
     <>
-      <Button
-        title={`Cart: $${cartTotal}`}
-        onPress={toggleOverlay}
-        type="clear"
-      />
-      <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
+      <Button title={`Cart: $${cartTotal}`} onPress={toggleModal} />
+      <Modal
+        visible={modalVisible}
+        onRequestClose={toggleModal}
+        animationType="slide"
+      >
         <View style={styles.container}>
           <Text style={styles.title}>Shopping Cart</Text>
           <ScrollView>
@@ -51,15 +52,18 @@ const ShoppingCart = () => {
               <CartPopoverProduct item={product} key={i} />
             ))}
           </ScrollView>
+          <Button title="Close" onPress={toggleModal} />
         </View>
-      </Overlay>
+      </Modal>
     </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 20,
+    backgroundColor: "white",
   },
   title: {
     fontSize: 20,

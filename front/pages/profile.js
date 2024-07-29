@@ -23,7 +23,6 @@ export default function ProfilePage({ navigation }) {
   const [editMessage, setEditMessage] = useState("");
   const [severity, setSeverity] = useState("success");
   const [title, setTitle] = useState("success");
-  const [topBuyer, setTopBuyer] = useState({});
   const [startD, setStartD] = useState(new Date("2024-02-01"));
   const [endD, setEndD] = useState(new Date());
   const [formData, setFormData] = useState({
@@ -32,8 +31,9 @@ export default function ProfilePage({ navigation }) {
     newPassword: "",
     confirmNewPassword: "",
   });
+  const [showDatePickerstart, setShowDatePickerstart] = useState(false);
+  const [showDatePickerend, setShowDatePickerend] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [isTopBuyer, setIsTopBuyer] = useState(false);
 
   const handleChange = (name, value) => {
     setFormData((prevData) => ({
@@ -57,7 +57,7 @@ export default function ProfilePage({ navigation }) {
       if (formData.name === user.name) return;
 
       const response = await axios.put(
-        `http://localhost:3001/api/users/updateName/`,
+        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/updateName/`,
         {
           userId: user._id,
           name: formData.name,
@@ -96,7 +96,7 @@ export default function ProfilePage({ navigation }) {
 
     try {
       const response = await axios.put(
-        `http://localhost:3001/api/users/updatePassword/`,
+        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/updatePassword/`,
         {
           userId: user._id,
           oldPw: formData.password,
@@ -154,7 +154,7 @@ export default function ProfilePage({ navigation }) {
     const getOrders = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/users/getOrdersByIdAndDates/${
+          `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getOrdersByIdAndDates/${
             user._id
           }/${startD.getTime()}/${endD.getTime()}`
         );
@@ -181,33 +181,6 @@ export default function ProfilePage({ navigation }) {
       getOrders();
     }
   }, [user, startD, endD]);
-
-  useEffect(() => {
-    const getTopBuyer = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3001/api/users/getTopBuyer`
-        );
-
-        if (!response) {
-          console.log("something went wrong while getting top buyer");
-          return;
-        }
-
-        setTopBuyer(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    getTopBuyer();
-  }, []);
-
-  useEffect(() => {
-    if (topBuyer[0] && topBuyer[0]._id === user._id) {
-      setIsTopBuyer(true);
-    }
-  }, [topBuyer, user]);
 
   return (
     <View style={styles.container}>
@@ -282,31 +255,39 @@ export default function ProfilePage({ navigation }) {
             <Button title="Close" onPress={() => setShowEditModal(false)} />
           </View>
         </Modal>
-        {isTopBuyer && (
-          <View style={styles.alertContainer}>
-            <Text style={styles.alertText}>
-              Congratulations! You are our top buyer, with a total purchase of $
-              {topBuyer[0]?.totalPurchases || 0}.
-            </Text>
-          </View>
-        )}
       </View>
       <View style={styles.ordersContainer}>
         <Text style={styles.subTitle}>My Orders</Text>
         <View style={styles.datePickers}>
-          <DateTimePicker
-            value={startD}
-            mode="date"
-            display="default"
-            onChange={(event, date) => setStartD(date || startD)}
+          <Button
+            title="Start Date"
+            onPress={() => setShowDatePickerstart(true)}
           />
-          <DateTimePicker
-            value={endD}
-            mode="date"
-            display="default"
-            onChange={(event, date) => setEndD(date || endD)}
-          />
+          {showDatePickerstart && (
+            <DateTimePicker
+              value={startD}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setStartD(selectedDate || startD);
+                setShowDatePickerstart(false);
+              }}
+            />
+          )}
+          <Button title="End Date" onPress={() => setShowDatePickerend(true)} />
+          {showDatePickerend && (
+            <DateTimePicker
+              value={endD}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setEndD(selectedDate || endD);
+                setShowDatePickerend(false);
+              }}
+            />
+          )}
         </View>
+
         <FlatList
           data={orders}
           keyExtractor={(item) => item._id}

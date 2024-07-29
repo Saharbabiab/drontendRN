@@ -37,7 +37,7 @@ export default function LoginPage({ navigation }) {
   const handleSubmit = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/users/login",
+        "https://rz2zg90j-3001.euw.devtunnels.ms/api/users/login",
         formData
       );
       if (response.data == "username is incorrect") {
@@ -46,7 +46,9 @@ export default function LoginPage({ navigation }) {
         setError("password is incorrect");
       } else {
         setUser(response.data);
-        const res = await axios.get("http://localhost:3001/api/users/getCart");
+        const res = await axios.get(
+          "https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart"
+        );
         setCart(res.data);
         console.log(res.data);
       }

@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Button, Modal } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Modal,
+  Image,
+  StyleSheet,
+} from "react-native";
 import axios from "axios";
-import FormGroup from "./FormGroup";
 import { useUserContext } from "../utils/userContext";
+import { launchImageLibrary } from "react-native-image-picker";
 
 export default function AddProduct({ setShowAddProduct, setProducts }) {
   const { user } = useUserContext();
@@ -12,9 +20,10 @@ export default function AddProduct({ setShowAddProduct, setProducts }) {
     name: "",
     img: "",
     description: "",
-    price: 0,
-    inStock: 0,
+    price: "",
+    inStock: "",
   });
+  const [imageUri, setImageUri] = useState("");
 
   const handleShow = () => {
     setShow(true);
@@ -24,51 +33,67 @@ export default function AddProduct({ setShowAddProduct, setProducts }) {
     setShow(false);
     setValidated(false);
     setShowAddProduct(false);
+    setImageUri(""); // Clear imageUri on close
   };
 
   const handleChange = (name, value) => {
     setFormData({ ...formData, [name]: value });
-    console.log(formData);
   };
-  useEffect(() => {}, [show]);
+
+  const handleImagePicker = () => {
+    launchImageLibrary(
+      { mediaType: "photo", includeBase64: true },
+      (response) => {
+        if (response.didCancel) {
+          console.log("User cancelled image picker");
+        } else if (response.error) {
+          console.log("ImagePicker Error: ", response.error);
+        } else {
+          setImageUri(response.assets[0].uri);
+          setFormData({ ...formData, img: response.assets[0].base64 });
+        }
+      }
+    );
+  };
 
   const handleSubmit = async () => {
-    if (validated === false) {
+    if (
+      !formData.name ||
+      !formData.img ||
+      !formData.description ||
+      !formData.price ||
+      !formData.inStock
+    ) {
       setValidated(true);
       return;
     }
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/products/create",
+        "https://rz2zg90j-3001.euw.devtunnels.ms/api/products/create",
         {
           name: formData.name,
-          img: formData.img,
+          img: formData.img, // Ensure this is the correct format for your API
           description: formData.description,
-          price: formData.price,
-          inStock: formData.inStock,
+          price: parseFloat(formData.price),
+          inStock: parseInt(formData.inStock, 10),
         }
       );
-      if (!response) console.log("something went wrong while creating product");
-      console.log(response);
       if (response.status === 200) {
         const productsResponse = await axios.get(
-          "http://localhost:3001/api/products/getProducts"
+          "https://rz2zg90j-3001.euw.devtunnels.ms/api/products/getProducts"
         );
-        if (!productsResponse)
-          console.log("something went wrong while fetching products");
-        console.log(productsResponse.data);
         setProducts(productsResponse.data);
       } else {
-        console.log("something went wrong while creating product");
+        console.log("Something went wrong while creating product");
       }
       handleClose();
       setFormData({
         name: "",
         img: "",
         description: "",
-        price: 0,
-        inStock: 0,
+        price: "",
+        inStock: "",
       });
     } catch (err) {
       console.log(err);
@@ -86,122 +111,120 @@ export default function AddProduct({ setShowAddProduct, setProducts }) {
               name: "",
               img: "",
               description: "",
-              price: 0,
-              inStock: 0,
+              price: "",
+              inStock: "",
             });
+            setImageUri(""); // Clear imageUri on show
           }}
         />
       )}
       <Modal visible={show} onRequestClose={handleClose}>
-        <View>
+        <View style={styles.modalContent}>
           <Text>Add Product</Text>
-        </View>
-        <View>
           <View>
             <Text>Name</Text>
             <TextInput
-              style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-              keyboardType={"text"}
+              style={styles.input}
+              keyboardType="default"
               onChangeText={(text) => handleChange("name", text)}
               value={formData.name}
-              required={true}
-              autoFocus={true}
-              placeholder={"Enter product name"}
+              placeholder="Enter product name"
             />
             {validated && !formData.name && (
-              <Text style={{ color: "red" }}>Please enter name</Text>
+              <Text style={styles.error}>Please enter name</Text>
             )}
           </View>
 
           <View>
-            <Text>Image Link</Text>
-            <TextInput
-              style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-              keyboardType={"text"}
-              onChangeText={(text) => handleChange("img", text)}
-              value={formData.img}
-              required={true}
-              autoFocus={true}
-              placeholder={"Enter image link"}
-            />
+            <Text>Image</Text>
+            <Button title="Select Image" onPress={handleImagePicker} />
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} style={styles.image} />
+            ) : null}
             {validated && !formData.img && (
-              <Text style={{ color: "red" }}>Please enter image link</Text>
+              <Text style={styles.error}>Please select an image</Text>
             )}
           </View>
 
           <View>
             <Text>Description</Text>
             <TextInput
-              style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-              keyboardType={"text"}
+              style={styles.input}
+              keyboardType="default"
               onChangeText={(text) => handleChange("description", text)}
               value={formData.description}
-              required={true}
-              autoFocus={true}
-              placeholder={"Enter product description"}
+              placeholder="Enter product description"
             />
             {validated && !formData.description && (
-              <Text style={{ color: "red" }}>Please enter description</Text>
+              <Text style={styles.error}>Please enter description</Text>
             )}
           </View>
 
           <View>
             <Text>Price</Text>
             <TextInput
-              style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-              keyboardType={"number-pad"}
+              style={styles.input}
+              keyboardType="numeric"
               onChangeText={(text) => handleChange("price", text)}
               value={formData.price}
-              required={true}
-              autoFocus={true}
-              placeholder={"Enter product price"}
+              placeholder="Enter product price"
             />
-            {validated && !formData.description && (
-              <Text style={{ color: "red" }}>Please enter product price</Text>
+            {validated && !formData.price && (
+              <Text style={styles.error}>Please enter product price</Text>
             )}
           </View>
 
           <View>
             <Text>In Stock</Text>
             <TextInput
-              style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-              keyboardType={"number-pad"}
+              style={styles.input}
+              keyboardType="numeric"
               onChangeText={(text) => handleChange("inStock", text)}
               value={formData.inStock}
-              required={true}
-              autoFocus={true}
-              placeholder={"Enter product in stock"}
+              placeholder="Enter product in stock"
             />
-            {validated && !formData.description && (
-              <Text style={{ color: "red" }}>
-                Please enter product in stock
-              </Text>
+            {validated && !formData.inStock && (
+              <Text style={styles.error}>Please enter product in stock</Text>
             )}
           </View>
-        </View>
-        <View>
-          <Button title="Close" onPress={handleClose} />
-          <Button title="Save" onPress={handleSubmit} />
+
+          <View style={styles.buttonContainer}>
+            <Button title="Close" onPress={handleClose} />
+            <Button title="Save" onPress={handleSubmit} />
+          </View>
         </View>
       </Modal>
     </View>
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   addProduct: {
     margin: 15,
   },
-  container: {
-    paddingVertical: 10,
+  modalContent: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "white",
   },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "rgba(0, 0, 0, 0.92)",
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 8,
   },
-  inactiveDot: {
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  error: {
+    color: "red",
   },
-};
+  image: {
+    width: 100,
+    height: 100,
+    marginVertical: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+});
