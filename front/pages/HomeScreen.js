@@ -11,22 +11,22 @@ const Stack = createNativeStackNavigator();
 export default function HomePage({ navigation }) {
   const { user, setUser, setCart } = useUserContext();
 
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await axios.post("http://localhost:3001/api/users/login", {
-          username: "s",
-          password: "1",
-        });
-        setUser(res.data);
-        setCart(res.data.cart);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     try {
+  //       const res = await axios.post("http://localhost:3001/api/users/login", {
+  //         username: "s",
+  //         password: "1",
+  //       });
+  //       setUser(res.data);
+  //       setCart(res.data.cart);
+  //     } catch (error) {
+  //       console.error("Error fetching user:", error);
+  //     }
+  //   };
 
-    getUser();
-  }, []);
+  //   getUser();
+  // }, []);
 
   return (
     <View>
