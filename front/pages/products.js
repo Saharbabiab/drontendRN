@@ -13,7 +13,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/products/getProducts`)
+      .get(`https://rz2zg90j-3001.euw.devtunnels.ms/api/products/getProducts`)
       .then((response) => {
         setProducts(response.data);
         console.log(response.data);

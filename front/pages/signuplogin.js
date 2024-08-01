@@ -49,7 +49,7 @@ export default function SignUpPage({ navigation }) {
     }
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/users/signup",
+        "https://rz2zg90j-3001.euw.devtunnels.ms/api/users/signup",
         {
           username: formData.username,
           name: formData.name,
@@ -60,7 +60,9 @@ export default function SignUpPage({ navigation }) {
         setError("username already exists");
       } else {
         setUser(response.data);
-        const res = await axios.get("http://localhost:3001/api/users/getCart");
+        const res = await axios.get(
+          "https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart"
+        );
         setCart(res.data);
         navigation.navigate("Home");
       }

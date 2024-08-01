@@ -32,19 +32,21 @@ export default function ProductCard({ product, setProducts }) {
   const handleAddToCart = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3001/api/users/addToCart/${product._id}`,
+        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/addToCart/${product._id}`,
         { userId: user._id, qty: quantity }
       );
       if (!response) {
         console.log("Something went wrong while adding to cart");
         return;
-      } else {
+      } else if (response.status !== 200) {
         setMessage("Not enough in stock");
         setShow(true);
       }
       if (response.status === 200) {
         await axios
-          .get(`http://localhost:3001/api/users/getCart/${user._id}`)
+          .get(
+            `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart/${user._id}`
+          )
           .then(
             (res) => {
               setCart(res.data.cart);

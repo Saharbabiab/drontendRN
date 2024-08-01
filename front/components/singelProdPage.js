@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, TextInput } from "react-native";
 import { Button, Animated } from "react-native";
 import QuantityPicker from "./QuantityPicker";
 import axios from "axios";
-import { useUserContext } from "../utils/userContext";
+import { useUserContext } from "../utils/userContext"; // Add this line to import the useUserContext hook
 
 export default function SingelProduct({ formData, setFormData, setProducts }) {
   const { user, cart, setCart } = useUserContext();
@@ -31,13 +31,13 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
     console.log(edited);
     try {
       const response = await axios.put(
-        `http://localhost:3001/api/products/editProduct/${formData._id}`,
+        `https://rz2zg90j-3001.euw.devtunnels.ms/api/products/editProduct/${formData._id}`,
         edited
       );
       if (!response) return console.log("something went wrong while editing");
       console.log(response);
       await axios
-        .get(`http://localhost:3001/api/products/getProducts`)
+        .get(`https://rz2zg90j-3001.euw.devtunnels.ms/api/products/getProducts`)
         .then((res) => {
           setProducts(res.data);
           setFormData(response.data);
@@ -51,7 +51,7 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
   const handleAddToCart = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3001/api/users/addToCart/${formData._id}`,
+        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/addToCart/${formData._id}`,
         { userId: user._id, qty: quantity }
       );
       if (!response) {
@@ -63,7 +63,9 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
       }
       if (response.status === 200) {
         await axios
-          .get(`http://localhost:3001/api/users/getCart/${user._id}`)
+          .get(
+            `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart/${user._id}`
+          )
           .then(
             (res) => {
               setCart(res.data.cart);
@@ -83,7 +85,7 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
       console.log(formData.name);
       console.log(formData._id);
       const response = await axios.delete(
-        `http://localhost:3001/api/products/deleteProduct/${formData._id}`
+        `https://rz2zg90j-3001.euw.devtunnels.ms/api/products/deleteProduct/${formData._id}`
       );
       if (!response) return console.log("something went wrong while deleting");
       console.log(response);
