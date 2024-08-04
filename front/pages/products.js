@@ -7,17 +7,15 @@ import AddProduct from "../components/AddProduct";
 import { Button } from "react-native-elements";
 
 export default function ProductsPage() {
-  const { user } = useUserContext();
+  const { user, api } = useUserContext();
   const [products, setProducts] = useState([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
 
   useEffect(() => {
-    axios
-      .get(`https://rz2zg90j-3001.euw.devtunnels.ms/api/products/getProducts`)
-      .then((response) => {
-        setProducts(response.data);
-        console.log(response.data);
-      });
+    axios.get(`${api}/products/getProducts`).then((response) => {
+      setProducts(response.data);
+      console.log(response.data);
+    });
   }, [showAddProduct]);
 
   return (

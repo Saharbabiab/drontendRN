@@ -7,12 +7,12 @@ import { useUserContext } from "../utils/userContext";
 import ShoppingCart from "../components/ShoppingCart";
 
 export default function HomePage({ navigation }) {
-  const { user, setUser, setCart } = useUserContext();
+  const { user, setUser, setCart, api } = useUserContext();
 
   // useEffect(() => {
   //   const getUser = async () => {
   //     try {
-  //       const res = await axios.post("http://localhost:3001/api/users/login", {
+  //       const res = await axios.post(`${api}/users/login`, {
   //         username: "s",
   //         password: "1",
   //       });

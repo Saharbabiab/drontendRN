@@ -6,7 +6,7 @@ import axios from "axios";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 
 const ShoppingCart = () => {
-  const { user, cart, setCart } = useUserContext();
+  const { user, cart, setCart, api } = useUserContext();
   const [modalVisible, setModalVisible] = useState(false);
   const [cartTotal, setCartTotal] = useState(0);
   const [cartProducts, setCartProducts] = useState([]);
@@ -14,9 +14,7 @@ const ShoppingCart = () => {
   useEffect(() => {
     const getCart = async () => {
       try {
-        const response = await axios.get(
-          `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart/${user._id}`
-        );
+        const response = await axios.get(`${api}/users/getCart/${user._id}`);
         setCart(response.data);
         setCartProducts(response.data);
         const total = response.data

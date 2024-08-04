@@ -1,13 +1,20 @@
 import React, { useState } from "react";
-import { View, Text, Image, StyleSheet, TextInput } from "react-native";
-import { Button, Animated } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Animated,
+} from "react-native";
 import QuantityPicker from "./QuantityPicker";
 import axios from "axios";
-import { useUserContext } from "../utils/userContext"; // Add this line to import the useUserContext hook
+import { useUserContext } from "../utils/userContext";
 
-export default function SingelProduct({ formData, setFormData, setProducts }) {
-  const { user, cart, setCart } = useUserContext();
-  const [Validated, setValidated] = useState(false);
+export default function SingleProduct({ formData, setFormData, setProducts }) {
+  const { user, cart, setCart, api } = useUserContext();
+  const [validated, setValidated] = useState(false);
   const [quantity, setQuantity] = useState(formData.inStock > 0 ? 1 : 0);
   const [show, setShow] = useState(false);
   const [message, setMessage] = useState("");
@@ -24,71 +31,52 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
   };
 
   const handleSubmit = async () => {
-    if (Validated === false) {
+    if (!validated) {
       setValidated(true);
       return;
     }
-    console.log(edited);
     try {
       const response = await axios.put(
-        `https://rz2zg90j-3001.euw.devtunnels.ms/api/products/editProduct/${formData._id}`,
+        `${api}/products/editProduct/${formData._id}`,
         edited
       );
       if (!response) return console.log("something went wrong while editing");
-      console.log(response);
-      await axios
-        .get(`https://rz2zg90j-3001.euw.devtunnels.ms/api/products/getProducts`)
-        .then((res) => {
-          setProducts(res.data);
-          setFormData(response.data);
-        });
+      const res = await axios.get(`${api}/products/getProducts`);
+      setProducts(res.data);
+      setFormData(response.data);
       setShow(false);
-      console.log(formData);
     } catch (err) {
       console.log(err);
     }
   };
+
   const handleAddToCart = async () => {
     try {
       const response = await axios.post(
-        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/addToCart/${formData._id}`,
+        `${api}/users/addToCart/${formData._id}`,
         { userId: user._id, qty: quantity }
       );
       if (!response) {
-        console.log("Something went wrong while adding to cart");
-        return;
-      } else {
         setMessage("Not enough in stock");
         setShow(true);
+        return;
       }
       if (response.status === 200) {
-        await axios
-          .get(
-            `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart/${user._id}`
-          )
-          .then(
-            (res) => {
-              setCart(res.data.cart);
-            },
-            (err) => {
-              console.log(err);
-            }
-          );
+        const res = await axios.get(`${api}/users/getCart/${user._id}`);
+        setCart(res.data.cart);
       }
       setQuantity(1);
     } catch (err) {
       console.log(err);
     }
   };
+
   const handleDelete = async () => {
     try {
-      console.log(formData.name);
-      console.log(formData._id);
       const response = await axios.delete(
-        `https://rz2zg90j-3001.euw.devtunnels.ms/api/products/deleteProduct/${formData._id}`
+        `${api}/products/deleteProduct/${formData._id}`
       );
       if (!response) return console.log("something went wrong while deleting");
-      console.log(response);
       setProducts((prevProducts) =>
         prevProducts.filter((p) => p._id !== formData._id)
       );
@@ -96,6 +84,7 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
       console.log(err);
     }
   };
+
   return (
     <View style={styles.card}>
       <Image style={styles.image} source={{ uri: formData.img }} />
@@ -108,17 +97,22 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
         disabled={formData.inStock <= 0}
         max={formData.inStock}
       />
-      <Button title="Edit" onPress={() => setShow(true)} />
-      <Button
-        title="Delete
-"
+      <TouchableOpacity style={styles.button} onPress={() => setShow(true)}>
+        <Text style={styles.buttonText}>Edit</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.button, styles.deleteButton]}
         onPress={handleDelete}
-      />
-      <Button
-        title="Add to cart"
+      >
+        <Text style={styles.buttonText}>Delete</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.button, styles.addToCartButton]}
         onPress={handleAddToCart}
         disabled={formData.inStock <= 0}
-      />
+      >
+        <Text style={styles.buttonText}>Add to cart</Text>
+      </TouchableOpacity>
       {show && <Text>{message}</Text>}
       <Animated.View style={{ opacity: show ? 1 : 0 }}>
         <View style={styles.form}>
@@ -150,11 +144,21 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
           <Text>In Stock</Text>
           <TextInput
             style={styles.input}
-            placeholder={edited.inStock}
-            onChangeText={(text) => setEdited({ ...edited, inStock: text })}
+            value={edited.inStock.toString()}
+            onChangeText={(text) =>
+              setEdited({ ...edited, inStock: parseInt(text) })
+            }
+            keyboardType="numeric"
           />
-          <Button title="Submit" onPress={handleSubmit} />
-          <Button title="Close" onPress={() => setShow(false)} />
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.closeButton]}
+            onPress={() => setShow(false)}
+          >
+            <Text style={styles.buttonText}>Close</Text>
+          </TouchableOpacity>
         </View>
       </Animated.View>
     </View>
@@ -164,6 +168,7 @@ export default function SingelProduct({ formData, setFormData, setProducts }) {
 const styles = StyleSheet.create({
   card: {
     width: "100%",
+    maxWidth: 400,
     marginVertical: 10,
     padding: 10,
     borderWidth: 1,
@@ -200,10 +205,24 @@ const styles = StyleSheet.create({
     padding: 5,
     marginVertical: 5,
   },
-  closeBtn: {
-    backgroundColor: "red",
-    color: "white",
+  button: {
+    backgroundColor: "#007BFF",
     padding: 10,
     borderRadius: 5,
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: "red",
+  },
+  addToCartButton: {
+    backgroundColor: "green",
+  },
+  closeButton: {
+    backgroundColor: "grey",
   },
 });

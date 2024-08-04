@@ -5,11 +5,11 @@ import { useUserContext } from "../utils/userContext";
 import { useNavigation } from "@react-navigation/native";
 
 export default function CartPopoverProduct({ item }) {
-  const { user, cart, setCart } = useUserContext();
+  const { user, cart, setCart, api } = useUserContext();
   const handleDelete = async () => {
     try {
       const response = await axios.delete(
-        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/removeFromCart/${item._id}`,
+        `${api}/users/removeFromCart/${item._id}`,
         { data: { userId: user._id } }
       );
       if (!response) console.log("something went wrong while deleting product");

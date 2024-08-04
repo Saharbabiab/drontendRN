@@ -13,7 +13,7 @@ import { useUserContext } from "../utils/userContext";
 import { useNavigation } from "@react-navigation/native";
 
 export default function LoginPage({ navigation }) {
-  const { user, setUser, setCart } = useUserContext();
+  const { user, setUser, setCart, api } = useUserContext();
 
   useEffect(() => {
     if (user) {
@@ -36,19 +36,14 @@ export default function LoginPage({ navigation }) {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(
-        "https://rz2zg90j-3001.euw.devtunnels.ms/api/users/login",
-        formData
-      );
+      const response = await axios.post(`${api}/users/login`, formData);
       if (response.data == "username is incorrect") {
         setError("username is incorrect");
       } else if (response.data == "password is incorrect") {
         setError("password is incorrect");
       } else {
         setUser(response.data);
-        const res = await axios.get(
-          "https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart"
-        );
+        const res = await axios.get(`${api}/users/getCart`);
         setCart(res.data);
         console.log(res.data);
       }

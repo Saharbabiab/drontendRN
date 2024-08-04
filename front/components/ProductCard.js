@@ -15,7 +15,7 @@ import { useUserContext } from "../utils/userContext";
 import SingelProduct from "./singelProdPage";
 
 export default function ProductCard({ product, setProducts }) {
-  const { user, cart, setCart } = useUserContext();
+  const { user, cart, setCart, api } = useUserContext();
   const [quantity, setQuantity] = useState(1);
   const [show, setShow] = useState(false);
   const [message, setMessage] = useState("");
@@ -32,7 +32,7 @@ export default function ProductCard({ product, setProducts }) {
   const handleAddToCart = async () => {
     try {
       const response = await axios.post(
-        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/addToCart/${product._id}`,
+        `${api}/users/addToCart/${product._id}`,
         { userId: user._id, qty: quantity }
       );
       if (!response) {
@@ -43,18 +43,14 @@ export default function ProductCard({ product, setProducts }) {
         setShow(true);
       }
       if (response.status === 200) {
-        await axios
-          .get(
-            `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart/${user._id}`
-          )
-          .then(
-            (res) => {
-              setCart(res.data.cart);
-            },
-            (err) => {
-              console.log(err);
-            }
-          );
+        await axios.get(`${api}/users/getCart/${user._id}`).then(
+          (res) => {
+            setCart(res.data.cart);
+          },
+          (err) => {
+            console.log(err);
+          }
+        );
       }
       setQuantity(1);
     } catch (err) {

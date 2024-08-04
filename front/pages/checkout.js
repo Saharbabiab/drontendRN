@@ -14,7 +14,7 @@ import { useUserContext } from "../utils/userContext";
 import CartPopoverProduct from "../components/CartPopoverProduct";
 
 export default function CheckoutPage() {
-  const { user, cart, setCart } = useUserContext();
+  const { user, cart, setCart, api } = useUserContext();
   const [totalPrice, setTotalPrice] = useState(0);
   const [updateCartModal, setUpdateCartModal] = useState(false);
   const [checkCart, setCheckCart] = useState(false);
@@ -23,7 +23,7 @@ export default function CheckoutPage() {
   const handleDelete = async (productId) => {
     try {
       const response = await axios.delete(
-        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/removeFromCart/${productId}`,
+        `${api}/users/removeFromCart/${productId}`,
         { data: { userId: user._id } }
       );
       if (!response) console.log("something went wrong while deleting product");
@@ -43,19 +43,19 @@ export default function CheckoutPage() {
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        "https://rz2zg90j-3001.euw.devtunnels.ms/api/orders/create",
-        { userId: user._id, items: cart, totalPrice: totalPrice }
-      );
+      const response = await axios.post(`${api}/orders/create`, {
+        userId: user._id,
+        items: cart,
+        totalPrice: totalPrice,
+      });
       if (response.status === 200) {
         setCart([]);
         setCheckCart(true);
         setUpdateCartModal(true);
         for (let product of cart) {
-          await axios.delete(
-            `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/removeFromCart/${product._id}`,
-            { data: { userId: user._id } }
-          );
+          await axios.delete(`${api}/users/removeFromCart/${product._id}`, {
+            data: { userId: user._id },
+          });
         }
       }
     } catch (error) {

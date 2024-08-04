@@ -15,7 +15,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import dayjs from "dayjs";
 
 export default function ProfilePage({ navigation }) {
-  const { user, setUser } = useUserContext();
+  const { user, setUser, api } = useUserContext();
   const [orders, setOrders] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [openEditMessage, setOpenEditMessage] = useState(false);
@@ -56,13 +56,10 @@ export default function ProfilePage({ navigation }) {
     try {
       if (formData.name === user.name) return;
 
-      const response = await axios.put(
-        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/updateName/`,
-        {
-          userId: user._id,
-          name: formData.name,
-        }
-      );
+      const response = await axios.put(`${api}/users/updateName/`, {
+        userId: user._id,
+        name: formData.name,
+      });
 
       if (!response) {
         console.log("something went wrong while updating name");
@@ -95,14 +92,11 @@ export default function ProfilePage({ navigation }) {
     }
 
     try {
-      const response = await axios.put(
-        `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/updatePassword/`,
-        {
-          userId: user._id,
-          oldPw: formData.password,
-          newPw: formData.newPassword,
-        }
-      );
+      const response = await axios.put(`${api}/users/updatePassword/`, {
+        userId: user._id,
+        oldPw: formData.password,
+        newPw: formData.newPassword,
+      });
 
       if (!response) {
         setShowEditModal(false);
@@ -154,7 +148,7 @@ export default function ProfilePage({ navigation }) {
     const getOrders = async () => {
       try {
         const response = await axios.get(
-          `https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getOrdersByIdAndDates/${
+          `${api}/users/getOrdersByIdAndDates/${
             user._id
           }/${startD.getTime()}/${endD.getTime()}`
         );

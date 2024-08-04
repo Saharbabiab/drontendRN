@@ -13,7 +13,7 @@ import { useUserContext } from "../utils/userContext";
 import { launchImageLibrary } from "react-native-image-picker";
 
 export default function AddProduct({ setShowAddProduct, setProducts }) {
-  const { user } = useUserContext();
+  const { user, api } = useUserContext();
   const [show, setShow] = useState(false);
   const [validated, setValidated] = useState(false);
   const [formData, setFormData] = useState({
@@ -69,20 +69,15 @@ export default function AddProduct({ setShowAddProduct, setProducts }) {
     }
 
     try {
-      const response = await axios.post(
-        "https://rz2zg90j-3001.euw.devtunnels.ms/api/products/create",
-        {
-          name: formData.name,
-          img: formData.img, // Ensure this is the correct format for your API
-          description: formData.description,
-          price: parseFloat(formData.price),
-          inStock: parseInt(formData.inStock, 10),
-        }
-      );
+      const response = await axios.post(`${api}/products/create`, {
+        name: formData.name,
+        img: formData.img, // Ensure this is the correct format for your API
+        description: formData.description,
+        price: parseFloat(formData.price),
+        inStock: parseInt(formData.inStock, 10),
+      });
       if (response.status === 200) {
-        const productsResponse = await axios.get(
-          "https://rz2zg90j-3001.euw.devtunnels.ms/api/products/getProducts"
-        );
+        const productsResponse = await axios.get(`${api}/products/getProducts`);
         setProducts(productsResponse.data);
       } else {
         console.log("Something went wrong while creating product");

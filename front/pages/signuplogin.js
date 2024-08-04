@@ -13,7 +13,7 @@ import { useUserContext } from "../utils/userContext";
 import { useNavigation } from "@react-navigation/native";
 
 export default function SignUpPage({ navigation }) {
-  const { user, setUser, setCart } = useUserContext();
+  const { user, setUser, setCart, api } = useUserContext();
 
   useEffect(() => {
     if (user) {
@@ -48,21 +48,16 @@ export default function SignUpPage({ navigation }) {
       return;
     }
     try {
-      const response = await axios.post(
-        "https://rz2zg90j-3001.euw.devtunnels.ms/api/users/signup",
-        {
-          username: formData.username,
-          name: formData.name,
-          password: formData.password,
-        }
-      );
+      const response = await axios.post(`${api}/users/signup`, {
+        username: formData.username,
+        name: formData.name,
+        password: formData.password,
+      });
       if (response.data == "username already exists") {
         setError("username already exists");
       } else {
         setUser(response.data);
-        const res = await axios.get(
-          "https://rz2zg90j-3001.euw.devtunnels.ms/api/users/getCart"
-        );
+        const res = await axios.get(`${api}/users/getCart`);
         setCart(res.data);
         navigation.navigate("Home");
       }
